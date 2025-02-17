@@ -134,20 +134,10 @@ public class FunctionalProgrammingTest {
             final var brie = new User("Brie", 12);
 
             // TODO: 아래 코드를 Comparator를 구현하는 익명 클래스로 변경하여 User의 나이를 기준으로 정렬하세요. 람다로도 구현해보세요.
-            final var users = new ArrayList<User>(List.of(brown, neo, brie));
-            for (int i = 0, end = users.size(); i < end; i++) {
-                for (int j = i + 1; j < end; j++) {
-                    if (users.get(i).age() > users.get(j).age()) {
-                        final var temp = users.get(i);
-                        users.set(i, users.get(j));
-                        users.set(j, temp);
-                    }
-                }
-            }
-
-            for (final var user : users) {
-                System.out.println(user.name() + ": " + user.age());
-            }
+            final var users = Stream.of(brown, neo, brie)
+                    .sorted(Comparator.comparingInt(User::age))
+                    .peek(user -> System.out.println(user.name() + ": " + user.age()))
+                    .toList();
 
             assertAll(
                     () -> assertThat(users).last().isSameAs(neo),
@@ -239,36 +229,17 @@ public class FunctionalProgrammingTest {
             class Calculator {
                 // TODO: 람다를 활용하여 sum 메서드를 통해 중복을 제거하세요.
                 static int sumAll(final List<Integer> numbers) {
-                    var total = 0;
-                    for (final var number : numbers) {
-                        total += number;
-                    }
-
-                    return total;
+                    return sum(numbers, number -> true);
                 }
 
                 // TODO: 람다를 활용하여 sum 메서드를 통해 중복을 제거하세요.
                 static int sumAllEven(final List<Integer> numbers) {
-                    var total = 0;
-                    for (final var number : numbers) {
-                        if (number % 2 == 0) {
-                            total += number;
-                        }
-                    }
-
-                    return total;
+                    return sum(numbers, number -> number % 2 == 0);
                 }
 
                 // TODO: 람다를 활용하여 sum 메서드를 통해 중복을 제거하세요.
                 static int sumAllOverThree(final List<Integer> numbers) {
-                    var total = 0;
-                    for (final var number : numbers) {
-                        if (number > 3) {
-                            total += number;
-                        }
-                    }
-
-                    return total;
+                    return sum(numbers, number -> number > 3);
                 }
 
                 private static int sum(
@@ -276,7 +247,10 @@ public class FunctionalProgrammingTest {
                         final Predicate<Integer> condition
                 ) {
                     // TODO: 조건에 맞게 필터링하여 합계를 구하는 기능을 구현하세요.
-                    return 0;
+                    return numbers.stream()
+                            .filter(condition)
+                            .reduce(Integer::sum)
+                            .orElse(0);
                 }
             }
 
